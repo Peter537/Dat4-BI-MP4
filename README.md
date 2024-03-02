@@ -6,5 +6,5 @@
 [x] Naïve Bayes fit
 [x] Random Forest fit (Better than Decision tree)
 [x] Voting fit
-[x] K-Means fit
+[x] K-Means fit (@Peter or @Yusuf, could you verify results?)
 [ ] Make Streamlit app (@Peter, you are welcome to do this, but I should have time for making a small app tomorrow!)
