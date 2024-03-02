@@ -2,7 +2,7 @@
 
 [ ] Check for outliers (Gaussian curves and z-score)
 [ ] Visualize data
-[ ] Naïve Bayes fit
-[ ] Random Forest fit (Better than Decision tree)
-[ ] Voting fit
+[x] Naïve Bayes fit
+[x] Random Forest fit (Better than Decision tree)
+[x] Voting fit
 [ ] K-Means fit
