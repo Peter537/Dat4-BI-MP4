@@ -6,3 +6,4 @@
 [x] Random Forest fit (Better than Decision tree)
 [x] Voting fit
 [ ] K-Means fit
+[ ] Make Streamlit app
