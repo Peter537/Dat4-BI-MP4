@@ -1,5 +1,6 @@
 import pandas as pd
 import streamlit as st
+st.sidebar.header("Choose a module!", divider='rainbow')
 import re
 
 import plotly.express as px
@@ -7,7 +8,6 @@ import plotly.io as pio
 
 import seaborn as sns
 import matplotlib.pyplot as plt
-
 
 def columnPicker(df):
         st.header('Grouping by a Nominal Attribute')
