@@ -34,11 +34,4 @@ The highest correlation we found was OverTime_Yes (24,6%), MaritalStatus_Single 
 
 - Which were the challenges in the project development?
 
-[x] Add many more comments
-[ ] Check for outliers (Gaussian curves and z-score) (Maybe this can be automated?) (@Peter, take a look at this if you have time. Don't think outliers is a big concern)
-[ ] Visualize data (@Peter, could you look at this?)
-[x] Naïve Bayes fit
-[x] Random Forest fit (Better than Decision tree)
-[x] Voting fit
-[x] K-Means fit (@Peter or @Yusuf, could you verify results?)
-[ ] Make Streamlit app (@Peter, you are welcome to do this, but I should have time for making a small app tomorrow!)
+When making the unsupervised models a bad result was returned. This caused confusion since a better result was expected, but after having spent time looking at both the input data and the output, a conclusion was made that the data just didn't fit the type of model. There was also the challenge of setting up the Streamlit application as it is a new library for the team. This required some experimenting which ultimately led to a better understanding of BI application development.
