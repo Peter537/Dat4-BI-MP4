@@ -23,3 +23,5 @@ class ModelChecker:
 
         rmse = sqrt(mse)
         print(f"Root mean squared error: {rmse}")
+
+        return score, mse, rmse
