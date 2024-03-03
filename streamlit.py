@@ -10,13 +10,12 @@ import requests
 import pandas as pd
 import numpy as np
 
-
 from io import StringIO
 import langdetect
 from langdetect import DetectorFactory, detect, detect_langs
 from PIL import Image
 
-import pickle
+isDataLoaded = False
 
 st.set_page_config(
     page_title="Streamlit Attrition",
@@ -38,6 +37,11 @@ banner = """
                 <h2 style="color:white;text-align:center;">Streamlit Attrition App</h2>
             </div>
     </body>
+    <style>
+        section[data-testid="stSidebar"][aria-expanded="true"]{
+            display: none;
+        }
+    </style>
     """
 
 st.markdown(banner, unsafe_allow_html=True)
@@ -53,9 +57,15 @@ st.markdown(
 """
 )
 
-def prepData():
+def readData(tab):
+    prepData(tab)
+
+def prepData(file):
     # We start by loading in the data and just take a quick peek at the first few rows and the shape of the data to see that the data is correctly loaded.
-    df = pd.read_excel(".\\Data\\WA_Fn-UseC_-HR-Employee-Attrition.xlsx")
+    try:
+        df = pd.read_excel(file)
+    except:
+        df = pd.read_excel(".\\Data\\WA_Fn-UseC_-HR-Employee-Attrition.xlsx")
 
     cleaned_df = df.drop(["Over18"], axis=1) # All values are "Y"
     cleaned_df = cleaned_df.drop(["EmployeeNumber"], axis=1) # All values are unique
@@ -67,3 +77,23 @@ def prepData():
 
     # Save the cleaned data
     cleaned_df.to_excel(".\\Data\\cleaned_data.xlsx", index=False)
+
+    st.success("Data has been loaded and cleaned. You can now proceed to the next step.")
+
+    banner = """
+    <style>
+        section[data-testid="stSidebar"][aria-expanded="true"]{
+            display: block;
+        }
+    </style>
+    """
+    st.markdown(banner, unsafe_allow_html=True)
+
+
+st.success("Select a file that contains attrition data, using the file loading tool. The file must match the format of the example file: https://www.kaggle.com/datasets/pavansubhasht/ibm-hr-analytics-attrition-dataset/data")
+tab = st.file_uploader("Your file")
+if tab is not None:  
+    try:
+        readData(tab) 
+    except:
+        pass
