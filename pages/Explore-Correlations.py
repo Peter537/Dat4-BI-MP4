@@ -44,6 +44,15 @@ def createTable(df):
     st.write('Correlation of Attrition_Yes with other attributes. The table shows the percentage of correlation. A positive percentage indicates a positive correlation, and a negative percentage indicates a negative correlation. The closer the percentage is to 100 or -100, the stronger the correlation, meaning the more likely or unlikely an employee is to leave.')
     st.write(df_attrition_yes_corr, use_container_width=True)        
 
+    st.markdown(
+        """
+        <style>
+            div[data-testid="stFullScreenFrame"] {
+                text-align: center;
+            }
+        </style>
+    """, unsafe_allow_html=True)
+
 def readableDataframe(dataframe):
     dataframe = dataframe.copy() # Copy of the frame to break the reference to the original frame
     dataframe.columns = dataframe.columns.str.replace('_', ' ')
