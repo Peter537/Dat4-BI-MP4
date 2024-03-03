@@ -21,7 +21,6 @@ def charts():
         
             tab1, tab2, tab3 = st.tabs(['Bar chart', 'Scatter plot', 'Line chart'])
             with tab1:
-
                 fig = px.bar(readableDataframe(df), x=x, y=y, color=z, title=f'{x} vs {y} by {z}')
                 st.plotly_chart(fig)
             
