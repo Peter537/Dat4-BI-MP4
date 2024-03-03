@@ -1,19 +1,18 @@
 # Design Home Page
 import os
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
+import pickle
 
 import streamlit as st
 from streamlit_option_menu import option_menu
 
-import json
-import requests
 import pandas as pd
 import numpy as np
 
-from io import StringIO
-import langdetect
-from langdetect import DetectorFactory, detect, detect_langs
-from PIL import Image
+import supervisedml as sml
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import VotingClassifier, RandomForestClassifier
+from sklearn.naive_bayes import BernoulliNB
 
 isDataLoaded = False
 
@@ -28,7 +27,7 @@ st.set_page_config(
     }
 )
 
-st.sidebar.header("Choose an example!", divider='rainbow')
+st.sidebar.header("Choose a module!", divider='rainbow')
 # st.sidebar.success("Select a demo case from above")
 
 banner = """
@@ -37,11 +36,6 @@ banner = """
                 <h2 style="color:white;text-align:center;">Streamlit Attrition App</h2>
             </div>
     </body>
-    <style>
-        section[data-testid="stSidebar"][aria-expanded="true"]{
-            display: none;
-        }
-    </style>
     """
 
 st.markdown(banner, unsafe_allow_html=True)
@@ -81,27 +75,74 @@ def prepData(file):
     df_corr = cleaned_df.corr()
 
     df_attrition_yes_corr = df_corr['Attrition_Yes'].sort_values(ascending=False)
-    cleaned_df = cleaned_df.drop(df_attrition_yes_corr[(df_attrition_yes_corr < 0.05) & (df_attrition_yes_corr > -0.05)].index, axis=1)
+    cleaned_df = cleaned_df.drop(df_attrition_yes_corr[(df_attrition_yes_corr < correlation) & (df_attrition_yes_corr > -correlation)].index, axis=1)
 
     # Save the cleaned data
     cleaned_df.to_excel(".\\Data\\cleaned_data.xlsx", index=False)
 
-    st.success("Data has been loaded and cleaned. You can now proceed to the next step.")
+    if correlation != 0.05:
+        test_size = 0.2
+        seed = 42
 
-    banner = """
-    <style>
-        section[data-testid="stSidebar"][aria-expanded="true"]{
-            display: block;
-        }
-    </style>
-    """
-    st.markdown(banner, unsafe_allow_html=True)
+        df = cleaned_df.dropna()
+
+        # Split the data into features and target
+        X = df.drop('Attrition_Yes', axis=1)
+        y = df['Attrition_Yes']
+
+        # Split the data into training and validation sets
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=seed)
+
+        st.spinner("Retraining model...")
+        # Random Forest Classifier with transformed data
+        print("--- Model Checker ---")
+        print("Random Forest Classifier")
+        RFCModelChecker = sml.ModelChecker(RandomForestClassifier(n_estimators=100), X_train, y_train, X_test, y_test)
+        RFCModelChecker.run()
+        RFCR2 = RFCModelChecker.show_accuracy()
+        RFCmodel = RFCModelChecker.model
+
+        # Bernoulli Naive Bayes with transformed data
+        print("\nBernoulli Naive Bayes")
+        BNBModelChecker = sml.ModelChecker(BernoulliNB(), X_train, y_train, X_test, y_test)
+        BNBModelChecker.run()
+        BNBR2 = BNBModelChecker.show_accuracy()
+        BNBmodel = BNBModelChecker.model
+
+        # Voting classifier with transformed data, Random Forest and Bernoulli Naive Bayes
+        print("\nVoting Classifier")
+        VCModelChecker = sml.ModelChecker(VotingClassifier(estimators=[('rf', RFCmodel), ('nb', BNBmodel)], voting='soft'), X_train, y_train, X_test, y_test)
+        VCModelChecker.run()
+        VCR2 = VCModelChecker.show_accuracy()
+        VCmodel = VCModelChecker.model
+
+        if RFCR2[0] > BNBR2[0] and RFCR2[0] > VCR2[0]:
+            bestfit_model = RFCmodel
+        elif BNBR2[0] > RFCR2[0] and BNBR2[0] > VCR2[0]:
+            bestfit_model = BNBmodel
+        else:
+            bestfit_model = VCmodel
+        
+        # Save the best model
+        filename = "bestfit_model.save"
+        pickle.dump(bestfit_model, open(filename, 'wb'))
+        st.success("Model has been retrained and saved.")
+        st.session_state["model"] = filename
+    else:
+        st.session_state["model"] = "bestfit_model.save"
+
+    st.success("Data has been loaded and cleaned. You can now proceed to the next step.")
 
 
 st.success("Select a file that contains attrition data, using the file loading tool. The file must match the format of the example file: https://www.kaggle.com/datasets/pavansubhasht/ibm-hr-analytics-attrition-dataset/data")
-tab = st.file_uploader("Your file")
-if tab is not None:  
+
+correlation = st.number_input("Minumum correlation with attrition (Standard is 0.05)", min_value=0.0, max_value=1.0, value=0.05, step=0.01)
+if correlation != 0.05:
+    st.warning("Selecting a correlation different from 0.05 will require the model to be retrained, which will trigger when file is uploaded. This may take a while...")
+
+file = st.file_uploader("Your file")
+if file is not None:  
     try:
-        readData(tab) 
+        readData(file) 
     except:
         pass
