@@ -67,13 +67,21 @@ def prepData(file):
     except:
         df = pd.read_excel(".\\Data\\WA_Fn-UseC_-HR-Employee-Attrition.xlsx")
 
+    # Clean redundant columns
     cleaned_df = df.drop(["Over18"], axis=1) # All values are "Y"
     cleaned_df = cleaned_df.drop(["EmployeeNumber"], axis=1) # All values are unique
     cleaned_df = cleaned_df.drop(["EmployeeCount"], axis=1) # All values are 1
     cleaned_df = cleaned_df.drop(["StandardHours"], axis=1) # All values are 80
 
+    # Convert categorical data to numerical data using one-hot encoding
     cleaned_df = pd.get_dummies(cleaned_df, columns=['Attrition', 'BusinessTravel', 'Department', 'EducationField', 'Gender', 'JobRole', 'MaritalStatus', 'OverTime'], dtype=pd.Int64Dtype())
     cleaned_df = cleaned_df.drop(["Attrition_No"], axis=1) # Redundant
+
+    # Remove columns with low correlation to attrition
+    df_corr = cleaned_df.corr()
+
+    df_attrition_yes_corr = df_corr['Attrition_Yes'].sort_values(ascending=False)
+    cleaned_df = cleaned_df.drop(df_attrition_yes_corr[(df_attrition_yes_corr < 0.05) & (df_attrition_yes_corr > -0.05)].index, axis=1)
 
     # Save the cleaned data
     cleaned_df.to_excel(".\\Data\\cleaned_data.xlsx", index=False)
