@@ -19,11 +19,20 @@ def columnPicker(df):
 # Design the visualisation
 def charts():
         
-            tab1, tab2, tab3 = st.tabs(['Table', 'Bar chart', 'Line Chart'])
-            with tab2:
+            tab1, tab2, tab3 = st.tabs(['Bar chart', 'Scatter plot', 'Line chart'])
+            with tab1:
 
                 fig = px.bar(readableDataframe(df), x=x, y=y, color=z, title=f'{x} vs {y} by {z}')
                 st.plotly_chart(fig)
+            
+            with tab2:
+                fig = px.scatter(readableDataframe(df), x=x, y=y, color=z, title=f'{x} vs {y} by {z}')
+                st.plotly_chart(fig)
+            
+            with tab3:
+                fig = px.line(readableDataframe(df), x=x, y=y, color=z, title=f'{x} vs {y} by {z}')
+                st.plotly_chart(fig)
+                  
 
 def createTable(df):
     df = df.copy() # Copy of the frame to break the reference to the original frame
